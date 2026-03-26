@@ -1,0 +1,35 @@
+name: Atualizar Dashboard
+
+on:
+  push:
+    paths:
+      - 'Dash.xlsx'
+
+jobs:
+  converter:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Python e dependências
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar openpyxl e pandas
+        run: pip install pandas openpyxl
+
+      - name: Converter Dash.xlsx para dados.json
+        run: python converter.py
+
+      - name: Publicar dados.json atualizado
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add dados.json
+          git diff --staged --quiet || git commit -m "Dados atualizados automaticamente - $(date +'%d/%m/%Y %H:%M')"
+          git push
